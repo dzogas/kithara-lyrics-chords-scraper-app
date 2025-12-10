@@ -1,4 +1,4 @@
-package com.example.kithara
+package com.example.kitharascraper
 
 import android.content.ContentValues
 import android.content.ClipData
@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.kithara.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,7 +40,18 @@ class MainActivity : AppCompatActivity() {
         scrapeBtn = findViewById(R.id.scrapeBtn)
         downloadBtn = findViewById(R.id.downloadBtn)
 
-        webView.settings.javaScriptEnabled = true
+// --- Recommended Secure WebView Settings ---
+        webView.settings.apply {
+            // This is required for your scraping logic to work.
+            // The security risk is low since you only load a specific, trusted URL.
+            javaScriptEnabled = true
+
+            // Security Best Practices: Disable features you don't need.
+            allowFileAccess = false
+            allowContentAccess = false
+            setSupportZoom(true) // Disable zoom if not needed
+        }
+        // webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 Toast.makeText(this@MainActivity, "✅ Σελίδα φορτώθηκε!", Toast.LENGTH_SHORT).show()
