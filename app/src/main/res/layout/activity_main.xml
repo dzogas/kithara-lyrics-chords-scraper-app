@@ -22,13 +22,13 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Αντιγραφή Στίχων/Ακκόρντων" />
+            android:text="@string/scrape_button" />
 
         <Button
             android:id="@+id/downloadBtn"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Λήψη ως ChordPro" />
+            android:text="@string/download_button" />
     </LinearLayout>
 </LinearLayout>

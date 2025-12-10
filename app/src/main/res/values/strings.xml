@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">KitharaScraper</string>
+    <string name="app_name">Kithara Scraper</string>
+    <string name="page_loaded">✅ Page loaded!</string>
+    <string name="copied_clipboard">✅ Copied to clipboard!</string>
+    <string name="saved_downloads">✅ Saved to Downloads/Chords:</string>
+    <string name="share_file">📤 Share file</string>
+    <string name="scrape_button">Scrape</string>
+    <string name="download_button">Save File</string>
+    <string name="file_save_error_toast">❌ Error saving file</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="unknown_title">Unknown Song Title</string>
 </resources>

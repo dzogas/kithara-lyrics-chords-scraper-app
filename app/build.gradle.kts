@@ -14,8 +14,8 @@ android {
         applicationId = "com.example.kithara"
         minSdk = 30
         targetSdk = 36
-        versionCode = 10
-        versionName = "0.1.0"
+        versionCode = 11
+        versionName = "0.1.1"
     }
 
     buildTypes {
@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material) // For XML View compatibility
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.core.splashscreen)
 
     // Jsoup for HTML parsing
     implementation(libs.jsoup)

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kithara Scraper</string>
+    <string name="page_loaded">✅ Σελίδα φορτώθηκε!</string>
+    <string name="copied_clipboard">✅ Έγινε αντιγραφή στο πρόχειρο!</string>
+    <string name="saved_downloads">✅ Αποθηκεύτηκε στο Downloads/Chords:</string>
+    <string name="share_file">📤 Μοιράσου το αρχείο</string>
+    <string name="scrape_button">Ανάλυση</string>
+    <string name="download_button">Αποθήκευση</string>
+    <string name="file_save_error_toast">❌ Σφάλμα αποθήκευσης</string>
+    <string name="unknown_artist">Άγνωστος Καλλιτέχνης</string>
+    <string name="unknown_title">Άγνωστος Τίτλος</string>
+</resources>

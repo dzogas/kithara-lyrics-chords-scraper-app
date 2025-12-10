@@ -14,6 +14,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+// import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.kithara.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,6 +35,9 @@ class MainActivity : AppCompatActivity() {
     private var lastArtist = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Σωστή κλήση χωρίς παραμέτρους
+        installSplashScreen()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -40,21 +45,17 @@ class MainActivity : AppCompatActivity() {
         scrapeBtn = findViewById(R.id.scrapeBtn)
         downloadBtn = findViewById(R.id.downloadBtn)
 
-// --- Recommended Secure WebView Settings ---
+        // --- Recommended Secure WebView Settings ---
         webView.settings.apply {
-            // This is required for your scraping logic to work.
-            // The security risk is low since you only load a specific, trusted URL.
             javaScriptEnabled = true
-
-            // Security Best Practices: Disable features you don't need.
             allowFileAccess = false
             allowContentAccess = false
-            setSupportZoom(true) // Disable zoom if not needed
+            setSupportZoom(true)
         }
-        // webView.settings.javaScriptEnabled = true
+
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                Toast.makeText(this@MainActivity, "✅ Σελίδα φορτώθηκε!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -115,33 +116,31 @@ class MainActivity : AppCompatActivity() {
                     chordPro.append("\n")
                     pendingChordLine = null
                 }
-                // ⚠️ Δεν χρησιμοποιούμε chMono γιατί δεν έχει σωστό spacing
             }
         }
 
         lastChordPro = chordPro.toString()
 
         withContext(Dispatchers.Main) {
-            Toast.makeText(this@MainActivity, "✅ Έγινε αντιγραφή στο πρόχειρο!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MainActivity, getString(R.string.copied_clipboard), Toast.LENGTH_SHORT).show()
             copyToClipboard(lastChordPro)
         }
     }
 
-    // Φτιάχνει τη γραμμή συγχορδιών με spacing από div.ch
     private fun buildChordLineFromCh(chDiv: Element): String {
         val sb = StringBuilder()
         for (node in chDiv.childNodes()) {
             when (node) {
-                is TextNode -> sb.append(node.wholeText) // κρατάει τα κενά
+                is TextNode -> sb.append(node.wholeText)
                 is Element -> {
                     when (node.tagName()) {
                         "span" -> {
                             for (tn in node.textNodes()) {
-                                sb.append(tn.wholeText) // spaces
+                                sb.append(tn.wholeText)
                             }
                         }
                         "a" -> {
-                            sb.append(node.text()) // chord token
+                            sb.append(node.text())
                         }
                     }
                 }
@@ -151,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun saveChordProToDownloads(content: String) {
-        val filename = "${lastArtist.ifBlank { "Unknown Artist" }} - ${lastTitle.ifBlank { "Unknown Title" }}.txt"
+        val filename = "${lastArtist.ifBlank { getString(R.string.unknown_artist) }} - ${lastTitle.ifBlank { getString(R.string.unknown_title) }}.txt"
 
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
@@ -167,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                 outputStream.write(content.toByteArray(Charsets.UTF_8))
             }
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@MainActivity, "✅ Αποθηκεύτηκε στο Downloads/Chords: $filename", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, "${getString(R.string.saved_downloads)} $filename", Toast.LENGTH_LONG).show()
                 openShareSheet(it)
             }
         }
@@ -180,7 +179,7 @@ class MainActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        startActivity(Intent.createChooser(shareIntent, "📤 Μοιράσου το αρχείο"))
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_file)))
     }
 
     private fun copyToClipboard(text: String) {

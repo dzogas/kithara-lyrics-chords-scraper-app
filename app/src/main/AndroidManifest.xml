@@ -6,17 +6,20 @@
 
     <application
         android:allowBackup="true"
-        android:label="Kithara Scraper"
+        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
-        <activity android:name="com.example.kitharascraper.MainActivity" android:exported="true">
+        android:theme="@style/Theme.KitharaScraper.Splash">
+
+        <activity
+            android:name="com.example.kitharascraper.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-    </application>
 
+    </application>
 </manifest>
