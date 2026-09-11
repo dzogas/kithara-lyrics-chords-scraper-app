@@ -4,10 +4,12 @@ import android.content.ContentValues
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
@@ -27,6 +29,7 @@ import org.jsoup.nodes.TextNode
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var backBtn: Button
     private lateinit var scrapeBtn: Button
     private lateinit var downloadBtn: Button
 
@@ -42,24 +45,36 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webView)
+        backBtn = findViewById(R.id.backBtn)
         scrapeBtn = findViewById(R.id.scrapeBtn)
         downloadBtn = findViewById(R.id.downloadBtn)
 
         // --- Recommended Secure WebView Settings ---
         webView.settings.apply {
             javaScriptEnabled = true
+            domStorageEnabled = true // Enable DOM storage for better site compatibility
             allowFileAccess = false
             allowContentAccess = false
             setSupportZoom(true)
         }
+        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
+                // Update back button state
+                backBtn.isEnabled = webView.canGoBack()
             }
         }
 
         webView.loadUrl("https://kithara.to/")
+
+        backBtn.setOnClickListener {
+            if (webView.canGoBack()) {
+                webView.goBack()
+            }
+        }
 
         scrapeBtn.setOnClickListener {
             webView.evaluateJavascript("(function(){return document.documentElement.outerHTML;})()") { html ->
