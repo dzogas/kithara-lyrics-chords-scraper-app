@@ -14,6 +14,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.Toast
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 // import androidx.core.splashscreen.SplashScreen
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var lastTitle = ""
     private var lastArtist = ""
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         // Σωστή κλήση χωρίς παραμέτρους
         installSplashScreen()

@@ -1,21 +1,18 @@
-@file:Suppress("DEPRECATION")
-
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.example.kithara"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.kithara"
-        minSdk = 30
-        targetSdk = 36
-        versionCode = 12
-        versionName = "0.1.2"
+        minSdk = 29
+        targetSdk = 37
+        versionCode = 13
+        versionName = "0.1.3"
     }
 
     buildTypes {
@@ -26,9 +23,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
     }
 }
 

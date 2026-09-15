@@ -7,7 +7,6 @@
     <string name="scrape_button">Scrape</string>
     <string name="download_button">Save File</string>
     <string name="back_button">Back</string>
-    <string name="file_save_error_toast">❌ Error saving file</string>
     <string name="unknown_artist">Unknown Artist</string>
     <string name="unknown_title">Unknown Song Title</string>
 </resources>
