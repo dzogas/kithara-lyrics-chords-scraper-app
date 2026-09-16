@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.kithara"
         minSdk = 29
         targetSdk = 37
-        versionCode = 13
-        versionName = "0.1.3"
+        versionCode = 14
+        versionName = "0.1.4"
     }
 
     buildTypes {

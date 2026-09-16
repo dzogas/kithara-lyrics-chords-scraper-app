@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Warm guitar silhouette -->
+    <path
+        android:fillColor="#FFB21A"
+        android:pathData="M29,62 C25,55 26,48 32,44 C37,40 43,41 47,45 L58,28 L64,31 L53,49 C57,54 56,61 52,66 C47,73 37,76 29,72 C25,70 23,66 29,62 Z" />
+    <path
+        android:fillColor="#E68A08"
+        android:pathData="M45,47 L58,26 L63,29 L51,51 Z" />
+    <path
+        android:fillColor="#FFB21A"
+        android:pathData="M57,25 L59,19 C60,16 63,15 66,16 L70,18 C72,20 72,23 70,25 L67,28 Z" />
+    <path
+        android:fillColor="#6E430B"
+        android:pathData="M39,53 A5,5 0,1 0,49 53 A5,5 0,1 0,39 53" />
+    <path
+        android:fillColor="#161616"
+        android:pathData="M30,63 L39,68 C40,69 40,70 39,71 C38,72 37,71 36,71 L29,67 C28,66 28,64 30,63 Z" />
+
+    <!-- Blue chord/fretboard mark -->
+    <path
+        android:fillColor="#19AEEB"
+        android:pathData="M68,36 L92,36 C94,36 95,38 95,40 L95,74 C95,76 94,77 92,77 L68,77 C66,77 65,76 65,74 L65,40 C65,38 66,36 68,36 Z" />
+    <path
+        android:fillColor="#071A2A"
+        android:pathData="M69,42 L91,42 L91,72 L69,72 Z" />
+    <path
+        android:fillColor="#19AEEB"
+        android:pathData="M69,50 L91,50 L91,52 L69,52 Z M69,60 L91,60 L91,62 L69,62 Z M69,70 L91,70 L91,72 L69,72 Z" />
+    <path
+        android:fillColor="#19AEEB"
+        android:pathData="M74,42 L76,42 L76,72 L74,72 Z M82,42 L84,42 L84,72 L82,72 Z" />
+    <path
+        android:fillColor="#FFB21A"
+        android:pathData="M66,34 L93,34 C95,34 96,36 96,38 C96,40 95,41 93,41 L66,41 C64,41 63,40 63,38 C63,36 64,34 66,34 Z" />
+    <path
+        android:fillColor="#FFB21A"
+        android:pathData="M79,54 A4,4 0,1 0,87 54 A4,4 0,1 0,79 54" />
+</vector>

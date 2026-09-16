@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Kithara Scraper</string>
+    <string name="splash_title">Kithara Lyrics &amp; Chords</string>
+    <string name="splash_subtitle">Scrape | Copy | Save</string>
     <string name="page_loaded">✅ Page loaded!</string>
     <string name="copied_clipboard">✅ Copied to clipboard!</string>
     <string name="saved_downloads">✅ Saved to Downloads/Chords:</string>
@@ -7,6 +9,11 @@
     <string name="scrape_button">Scrape</string>
     <string name="download_button">Save File</string>
     <string name="back_button">Back</string>
+    <string name="reload_button">Reload</string>
     <string name="unknown_artist">Unknown Artist</string>
     <string name="unknown_title">Unknown Song Title</string>
+    <string name="offline_error">No internet connection. Connect to the internet and try again.</string>
+    <string name="page_load_error">Could not load kithara.to. Check your connection and try again.</string>
+    <string name="http_error">kithara.to returned HTTP error %1$d.</string>
+    <string name="blocked_navigation">Navigation outside kithara.to was blocked.</string>
 </resources>

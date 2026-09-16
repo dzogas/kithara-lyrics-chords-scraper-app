@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Kithara Scraper</string>
+    <string name="splash_title">Kithara Lyrics &amp; Chords</string>
+    <string name="splash_subtitle">Ανάλυση | Αντιγραφή | Αποθήκευση</string>
     <string name="page_loaded">✅ Σελίδα φορτώθηκε!</string>
     <string name="copied_clipboard">✅ Έγινε αντιγραφή στο πρόχειρο!</string>
     <string name="saved_downloads">✅ Αποθηκεύτηκε στο Downloads/Chords:</string>
@@ -8,6 +10,11 @@
     <string name="scrape_button">Ανάλυση</string>
     <string name="download_button">Αποθήκευση</string>
     <string name="back_button">Πίσω</string>
+    <string name="reload_button">Επαναφόρτωση</string>
     <string name="unknown_artist">Άγνωστος Καλλιτέχνης</string>
     <string name="unknown_title">Άγνωστος Τίτλος</string>
+    <string name="offline_error">Δεν υπάρχει σύνδεση στο διαδίκτυο. Συνδεθείτε και δοκιμάστε ξανά.</string>
+    <string name="page_load_error">Δεν ήταν δυνατή η φόρτωση του kithara.to. Ελέγξτε τη σύνδεσή σας.</string>
+    <string name="http_error">Το kithara.to επέστρεψε σφάλμα HTTP %1$d.</string>
+    <string name="blocked_navigation">Η πλοήγηση εκτός kithara.to αποκλείστηκε.</string>
 </resources>

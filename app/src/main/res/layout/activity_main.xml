@@ -4,13 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- WebView για να φορτώνει το kithara.to -->
-    <WebView
-        android:id="@+id/webView"
+    <!-- Web content and loading state -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@android:color/transparent" />
+        android:layout_weight="1">
+
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/reloadBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="@color/purple_500"
+        android:textColor="@color/white"
+        android:text="@string/reload_button"
+        android:visibility="gone" />
 
     <!-- Κουμπιά κάτω από το WebView -->
     <LinearLayout

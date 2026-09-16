@@ -5,16 +5,19 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import android.annotation.SuppressLint
+import android.webkit.WebResourceRequest
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 // import androidx.core.splashscreen.SplashScreen
@@ -29,27 +32,47 @@ import org.jsoup.nodes.TextNode
 
 class MainActivity : AppCompatActivity() {
 
+    private companion object {
+        const val HOME_URL = "https://kithara.to/"
+        const val ALLOWED_HOST = "kithara.to"
+        const val GOOGLE_HOST = "google.com"
+    }
+
     private lateinit var webView: WebView
+    private lateinit var progressBar: ProgressBar
     private lateinit var backBtn: Button
     private lateinit var scrapeBtn: Button
     private lateinit var downloadBtn: Button
+    private lateinit var reloadBtn: Button
 
     private var lastChordPro = ""
     private var lastTitle = ""
     private var lastArtist = ""
+    private var mainFrameHttpError: Int? = null
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         // Σωστή κλήση χωρίς παραμέτρους
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.splash_screen)
+        window.decorView.postDelayed({
+            if (!isFinishing && !isDestroyed) {
+                showMainScreen()
+            }
+        }, 700L)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun showMainScreen() {
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webView)
+        progressBar = findViewById(R.id.progressBar)
         backBtn = findViewById(R.id.backBtn)
         scrapeBtn = findViewById(R.id.scrapeBtn)
         downloadBtn = findViewById(R.id.downloadBtn)
+        reloadBtn = findViewById(R.id.reloadBtn)
 
         // --- Recommended Secure WebView Settings ---
         webView.settings.apply {
@@ -60,17 +83,86 @@ class MainActivity : AppCompatActivity() {
             setSupportZoom(true)
         }
         webView.setBackgroundColor(Color.TRANSPARENT)
-        webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                mainFrameHttpError = null
+                progressBar.visibility = ProgressBar.VISIBLE
+                reloadBtn.visibility = Button.GONE
+                scrapeBtn.isEnabled = false
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
-                Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
-                // Update back button state
+                progressBar.visibility = ProgressBar.GONE
                 backBtn.isEnabled = webView.canGoBack()
+
+                val httpError = mainFrameHttpError
+                if (httpError == null) {
+                    scrapeBtn.isEnabled = true
+                    reloadBtn.visibility = Button.GONE
+                    Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                view?.evaluateJavascript("document.querySelector('div#text') !== null") { result ->
+                    if (result == "true") {
+                        mainFrameHttpError = null
+                        scrapeBtn.isEnabled = true
+                        reloadBtn.visibility = Button.GONE
+                        Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
+                    } else {
+                        scrapeBtn.isEnabled = false
+                        reloadBtn.visibility = Button.VISIBLE
+                        Toast.makeText(
+                            this@MainActivity,
+                            getString(R.string.http_error, httpError),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url ?: return true
+                if (isAllowedUrl(url)) {
+                    return false
+                }
+                Toast.makeText(this@MainActivity, getString(R.string.blocked_navigation), Toast.LENGTH_SHORT).show()
+                return true
+            }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: android.webkit.WebResourceError?
+            ) {
+                if (request?.isForMainFrame == true) {
+                    progressBar.visibility = ProgressBar.GONE
+                    scrapeBtn.isEnabled = false
+                    reloadBtn.visibility = Button.VISIBLE
+                    Toast.makeText(this@MainActivity, getString(R.string.page_load_error), Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: android.webkit.WebResourceResponse?
+            ) {
+                if (request?.isForMainFrame == true) {
+                    mainFrameHttpError = errorResponse?.statusCode ?: 0
+                }
             }
         }
 
-        webView.loadUrl("https://kithara.to/")
+        if (isOnline()) {
+            webView.loadUrl(HOME_URL)
+        } else {
+            progressBar.visibility = ProgressBar.GONE
+            scrapeBtn.isEnabled = false
+            reloadBtn.visibility = Button.VISIBLE
+            Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
+        }
 
         backBtn.setOnClickListener {
             if (webView.canGoBack()) {
@@ -100,6 +192,36 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        reloadBtn.setOnClickListener {
+            if (isOnline()) {
+                progressBar.visibility = ProgressBar.VISIBLE
+                reloadBtn.visibility = Button.GONE
+                if (webView.url.isNullOrBlank()) {
+                    webView.loadUrl(HOME_URL)
+                } else {
+                    webView.reload()
+                }
+            } else {
+                Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun isAllowedUrl(uri: Uri): Boolean {
+        val host = uri.host?.lowercase() ?: return false
+        val isAllowedHost = host == ALLOWED_HOST ||
+            host.endsWith(".$ALLOWED_HOST") ||
+            host == GOOGLE_HOST ||
+            host.endsWith(".$GOOGLE_HOST")
+        return uri.scheme == "https" && isAllowedHost
+    }
+
+    private fun isOnline(): Boolean {
+        val connectivityManager = getSystemService(ConnectivityManager::class.java)
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     private suspend fun scrapeSong(html: String) {
