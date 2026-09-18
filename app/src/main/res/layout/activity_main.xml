@@ -6,6 +6,47 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="@color/purple_700">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerInside"
+            android:src="@drawable/splash_logo" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/header_title"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/headerVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="#D8C7FF"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="12dp"
@@ -91,10 +132,12 @@
         <Button
             android:id="@+id/backBtn"
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_weight="0.8"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/purple_500"
             android:textColor="@color/white"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
             android:text="@string/back_button" />
 
         <Button
@@ -104,15 +147,19 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/purple_500"
             android:textColor="@color/white"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
             android:text="@string/scrape_button" />
 
         <Button
             android:id="@+id/downloadBtn"
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_weight="1.4"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/purple_500"
             android:textColor="@color/white"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
             android:text="@string/download_button" />
     </LinearLayout>
 </LinearLayout>

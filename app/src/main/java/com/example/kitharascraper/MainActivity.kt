@@ -17,7 +17,6 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import android.annotation.SuppressLint
 import android.webkit.WebResourceRequest
 import androidx.appcompat.app.AppCompatActivity
@@ -35,7 +34,7 @@ import org.jsoup.nodes.TextNode
 class MainActivity : AppCompatActivity() {
 
     private companion object {
-        const val HOME_URL = "https://kithara.to/"
+        const val HOME_URL = "https://www.google.com/cse?cx=34db0576810b64cd3"
         const val ALLOWED_HOST = "kithara.to"
         const val GOOGLE_HOST = "google.com"
     }
@@ -73,6 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun showMainScreen() {
+        window.setBackgroundDrawableResource(android.R.color.white)
         setContentView(R.layout.activity_main)
 
         webViewContainer = findViewById(R.id.webViewContainer)
@@ -85,6 +85,10 @@ class MainActivity : AppCompatActivity() {
         songTitle = findViewById(R.id.songTitle)
         songArtist = findViewById(R.id.songArtist)
         songKey = findViewById(R.id.songKey)
+        findViewById<TextView>(R.id.headerVersion).text = getString(
+            R.string.version_label,
+            packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
+        )
 
         scrapeBtn.isEnabled = false
         window.decorView.post { initializeWebView() }
@@ -134,7 +138,7 @@ class MainActivity : AppCompatActivity() {
                     webView.reload()
                 }
             } else {
-                Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
+                updateStatus(getString(R.string.status_offline))
             }
         }
     }
@@ -180,7 +184,6 @@ class MainActivity : AppCompatActivity() {
                     scrapeBtn.isEnabled = true
                     reloadBtn.visibility = Button.GONE
                     updateStatus(getString(R.string.status_ready))
-                    Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
                     return
                 }
 
@@ -190,16 +193,10 @@ class MainActivity : AppCompatActivity() {
                         scrapeBtn.isEnabled = true
                         reloadBtn.visibility = Button.GONE
                         updateStatus(getString(R.string.status_ready))
-                        Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
                     } else {
                         scrapeBtn.isEnabled = false
                         reloadBtn.visibility = Button.VISIBLE
                         updateStatus(getString(R.string.status_http_error, httpError))
-                        Toast.makeText(
-                            this@MainActivity,
-                            getString(R.string.http_error, httpError),
-                            Toast.LENGTH_LONG
-                        ).show()
                     }
                 }
             }
@@ -209,7 +206,7 @@ class MainActivity : AppCompatActivity() {
                 if (isAllowedUrl(url)) {
                     return false
                 }
-                Toast.makeText(this@MainActivity, getString(R.string.blocked_navigation), Toast.LENGTH_SHORT).show()
+                updateStatus(getString(R.string.status_blocked_navigation))
                 return true
             }
 
@@ -223,7 +220,6 @@ class MainActivity : AppCompatActivity() {
                     scrapeBtn.isEnabled = false
                     reloadBtn.visibility = Button.VISIBLE
                     updateStatus(getString(R.string.status_page_error))
-                    Toast.makeText(this@MainActivity, getString(R.string.page_load_error), Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -245,7 +241,6 @@ class MainActivity : AppCompatActivity() {
             scrapeBtn.isEnabled = false
             reloadBtn.visibility = Button.VISIBLE
             updateStatus(getString(R.string.status_offline))
-            Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
         }
 
     }
@@ -317,7 +312,6 @@ class MainActivity : AppCompatActivity() {
             songArtist.text = getString(R.string.status_artist, lastArtist.ifBlank { getString(R.string.unknown_artist) })
             songKey.text = getString(R.string.status_key, lastKey.ifBlank { getString(R.string.status_unknown) })
             updateStatus(getString(R.string.status_scraped))
-            Toast.makeText(this@MainActivity, getString(R.string.copied_clipboard), Toast.LENGTH_SHORT).show()
             copyToClipboard(lastChordPro)
         }
     }
@@ -373,7 +367,7 @@ class MainActivity : AppCompatActivity() {
                 outputStream.write(content.toByteArray(Charsets.UTF_8))
             }
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@MainActivity, "${getString(R.string.saved_downloads)} $filename", Toast.LENGTH_LONG).show()
+                updateStatus(getString(R.string.status_saved, filename))
                 openShareSheet(it)
             }
         }
