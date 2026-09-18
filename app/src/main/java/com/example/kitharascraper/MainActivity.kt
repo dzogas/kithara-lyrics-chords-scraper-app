@@ -14,7 +14,9 @@ import android.provider.MediaStore
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import android.annotation.SuppressLint
 import android.webkit.WebResourceRequest
@@ -39,15 +41,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var webView: WebView
+    private lateinit var webViewContainer: FrameLayout
     private lateinit var progressBar: ProgressBar
     private lateinit var backBtn: Button
     private lateinit var scrapeBtn: Button
     private lateinit var downloadBtn: Button
     private lateinit var reloadBtn: Button
+    private lateinit var statusState: TextView
+    private lateinit var songTitle: TextView
+    private lateinit var songArtist: TextView
+    private lateinit var songKey: TextView
 
     private var lastChordPro = ""
     private var lastTitle = ""
     private var lastArtist = ""
+    private var lastKey = ""
     private var mainFrameHttpError: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,17 +75,87 @@ class MainActivity : AppCompatActivity() {
     private fun showMainScreen() {
         setContentView(R.layout.activity_main)
 
-        webView = findViewById(R.id.webView)
+        webViewContainer = findViewById(R.id.webViewContainer)
         progressBar = findViewById(R.id.progressBar)
         backBtn = findViewById(R.id.backBtn)
         scrapeBtn = findViewById(R.id.scrapeBtn)
         downloadBtn = findViewById(R.id.downloadBtn)
         reloadBtn = findViewById(R.id.reloadBtn)
+        statusState = findViewById(R.id.statusState)
+        songTitle = findViewById(R.id.songTitle)
+        songArtist = findViewById(R.id.songArtist)
+        songKey = findViewById(R.id.songKey)
+
+        scrapeBtn.isEnabled = false
+        window.decorView.post { initializeWebView() }
+
+        backBtn.setOnClickListener {
+            if (::webView.isInitialized && webView.canGoBack()) {
+                webView.goBack()
+            }
+        }
+
+        scrapeBtn.setOnClickListener {
+            if (!::webView.isInitialized) return@setOnClickListener
+            webView.evaluateJavascript("(function(){return document.documentElement.outerHTML;})()") { html ->
+                val cleanHtml = html
+                    ?.replace("\\u003C", "<")
+                    ?.replace("\\\"", "\"")
+                    ?.replace("\\n", "\n")
+                    ?.trim('"')
+                if (cleanHtml != null) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        scrapeSong(cleanHtml)
+                    }
+                }
+            }
+        }
+
+        downloadBtn.setOnClickListener {
+            if (lastChordPro.isNotEmpty()) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    saveChordProToDownloads(lastChordPro)
+                }
+            }
+        }
+
+        reloadBtn.setOnClickListener {
+            if (isOnline()) {
+                progressBar.visibility = ProgressBar.VISIBLE
+                reloadBtn.visibility = Button.GONE
+                updateStatus(getString(R.string.status_loading))
+                if (!::webView.isInitialized || webView.url.isNullOrBlank()) {
+                    if (!::webView.isInitialized) {
+                        initializeWebView()
+                    } else {
+                        webView.loadUrl(HOME_URL)
+                    }
+                } else {
+                    webView.reload()
+                }
+            } else {
+                Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun initializeWebView() {
+        if (::webView.isInitialized || isFinishing || isDestroyed) return
+
+        webView = WebView(this)
+        webViewContainer.addView(
+            webView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        )
 
         // --- Recommended Secure WebView Settings ---
         webView.settings.apply {
             javaScriptEnabled = true
-            domStorageEnabled = true // Enable DOM storage for better site compatibility
+            domStorageEnabled = true
             allowFileAccess = false
             allowContentAccess = false
             setSupportZoom(true)
@@ -90,6 +168,7 @@ class MainActivity : AppCompatActivity() {
                 progressBar.visibility = ProgressBar.VISIBLE
                 reloadBtn.visibility = Button.GONE
                 scrapeBtn.isEnabled = false
+                updateStatus(getString(R.string.status_loading))
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -100,6 +179,7 @@ class MainActivity : AppCompatActivity() {
                 if (httpError == null) {
                     scrapeBtn.isEnabled = true
                     reloadBtn.visibility = Button.GONE
+                    updateStatus(getString(R.string.status_ready))
                     Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
                     return
                 }
@@ -109,10 +189,12 @@ class MainActivity : AppCompatActivity() {
                         mainFrameHttpError = null
                         scrapeBtn.isEnabled = true
                         reloadBtn.visibility = Button.GONE
+                        updateStatus(getString(R.string.status_ready))
                         Toast.makeText(this@MainActivity, getString(R.string.page_loaded), Toast.LENGTH_SHORT).show()
                     } else {
                         scrapeBtn.isEnabled = false
                         reloadBtn.visibility = Button.VISIBLE
+                        updateStatus(getString(R.string.status_http_error, httpError))
                         Toast.makeText(
                             this@MainActivity,
                             getString(R.string.http_error, httpError),
@@ -140,6 +222,7 @@ class MainActivity : AppCompatActivity() {
                     progressBar.visibility = ProgressBar.GONE
                     scrapeBtn.isEnabled = false
                     reloadBtn.visibility = Button.VISIBLE
+                    updateStatus(getString(R.string.status_page_error))
                     Toast.makeText(this@MainActivity, getString(R.string.page_load_error), Toast.LENGTH_LONG).show()
                 }
             }
@@ -161,51 +244,10 @@ class MainActivity : AppCompatActivity() {
             progressBar.visibility = ProgressBar.GONE
             scrapeBtn.isEnabled = false
             reloadBtn.visibility = Button.VISIBLE
+            updateStatus(getString(R.string.status_offline))
             Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
         }
 
-        backBtn.setOnClickListener {
-            if (webView.canGoBack()) {
-                webView.goBack()
-            }
-        }
-
-        scrapeBtn.setOnClickListener {
-            webView.evaluateJavascript("(function(){return document.documentElement.outerHTML;})()") { html ->
-                val cleanHtml = html
-                    ?.replace("\\u003C", "<")
-                    ?.replace("\\\"", "\"")
-                    ?.replace("\\n", "\n")
-                    ?.trim('"')
-                if (cleanHtml != null) {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        scrapeSong(cleanHtml)
-                    }
-                }
-            }
-        }
-
-        downloadBtn.setOnClickListener {
-            if (lastChordPro.isNotEmpty()) {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    saveChordProToDownloads(lastChordPro)
-                }
-            }
-        }
-
-        reloadBtn.setOnClickListener {
-            if (isOnline()) {
-                progressBar.visibility = ProgressBar.VISIBLE
-                reloadBtn.visibility = Button.GONE
-                if (webView.url.isNullOrBlank()) {
-                    webView.loadUrl(HOME_URL)
-                } else {
-                    webView.reload()
-                }
-            } else {
-                Toast.makeText(this, getString(R.string.offline_error), Toast.LENGTH_LONG).show()
-            }
-        }
     }
 
     private fun isAllowedUrl(uri: Uri): Boolean {
@@ -229,13 +271,23 @@ class MainActivity : AppCompatActivity() {
 
         lastTitle = doc.select("h1.ti").text()
         lastArtist = doc.select("h2.ar").text()
-        val key = doc.select("summary .til").text()
-
-        val chordPro = StringBuilder()
-        chordPro.append("{title: $lastTitle}\n{artist: $lastArtist}\n{key: $key}\n\n")
+        lastKey = doc.select("summary .til").text()
 
         val textDiv = doc.selectFirst("div#text")
         val children = textDiv?.children() ?: return
+
+        if (lastKey.isBlank()) {
+            lastKey = children
+                .asSequence()
+                .filter { it.hasClass("ch") }
+                .map { buildChordLineFromCh(it) }
+                .mapNotNull(::extractFirstChord)
+                .firstOrNull()
+                .orEmpty()
+        }
+
+        val chordPro = StringBuilder()
+        chordPro.append("{title: $lastTitle}\n{artist: $lastArtist}\n{key: $lastKey}\n\n")
 
         var pendingChordLine: String? = null
 
@@ -261,9 +313,25 @@ class MainActivity : AppCompatActivity() {
         lastChordPro = chordPro.toString()
 
         withContext(Dispatchers.Main) {
+            songTitle.text = lastTitle.ifBlank { getString(R.string.status_no_song) }
+            songArtist.text = getString(R.string.status_artist, lastArtist.ifBlank { getString(R.string.unknown_artist) })
+            songKey.text = getString(R.string.status_key, lastKey.ifBlank { getString(R.string.status_unknown) })
+            updateStatus(getString(R.string.status_scraped))
             Toast.makeText(this@MainActivity, getString(R.string.copied_clipboard), Toast.LENGTH_SHORT).show()
             copyToClipboard(lastChordPro)
         }
+    }
+
+    private fun updateStatus(message: String) {
+        if (::statusState.isInitialized) {
+            statusState.text = message
+        }
+    }
+
+    private fun extractFirstChord(chordLine: String): String? {
+        return Regex("\\b[A-G][#b]?(?:m|min|maj|sus|dim|aug|add)?[0-9]*(?:/[A-G][#b]?)?\\b")
+            .find(chordLine)
+            ?.value
     }
 
     private fun buildChordLineFromCh(chDiv: Element): String {

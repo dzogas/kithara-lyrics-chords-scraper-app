@@ -17,4 +17,17 @@
     <string name="page_load_error">Δεν ήταν δυνατή η φόρτωση του kithara.to. Ελέγξτε τη σύνδεσή σας.</string>
     <string name="http_error">Το kithara.to επέστρεψε σφάλμα HTTP %1$d.</string>
     <string name="blocked_navigation">Η πλοήγηση εκτός kithara.to αποκλείστηκε.</string>
+    <string name="status_starting">Εκκίνηση&#8230;</string>
+    <string name="status_loading">Φόρτωση σελίδας&#8230;</string>
+    <string name="status_ready">Έτοιμο. Επιλέξτε τραγούδι και πατήστε Ανάλυση.</string>
+    <string name="status_scraped">Το τραγούδι αναλύθηκε και αντιγράφηκε.</string>
+    <string name="status_offline">Χωρίς σύνδεση. Συνδεθείτε και πατήστε Επαναφόρτωση.</string>
+    <string name="status_page_error">Η σελίδα δεν φορτώθηκε. Πατήστε Επαναφόρτωση.</string>
+    <string name="status_http_error">Σφάλμα HTTP %1$d. Πατήστε Επαναφόρτωση.</string>
+    <string name="status_no_song">Δεν επιλέχθηκε τραγούδι</string>
+    <string name="status_artist_empty">Καλλιτέχνης: -</string>
+    <string name="status_key_empty">Τόνος: -</string>
+    <string name="status_artist">Καλλιτέχνης: %1$s</string>
+    <string name="status_key">Τόνος: %1$s</string>
+    <string name="status_unknown">Άγνωστο</string>
 </resources>

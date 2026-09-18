@@ -16,4 +16,17 @@
     <string name="page_load_error">Could not load kithara.to. Check your connection and try again.</string>
     <string name="http_error">kithara.to returned HTTP error %1$d.</string>
     <string name="blocked_navigation">Navigation outside kithara.to was blocked.</string>
+    <string name="status_starting">Starting&#8230;</string>
+    <string name="status_loading">Loading page&#8230;</string>
+    <string name="status_ready">Ready. Select a song and press Scrape.</string>
+    <string name="status_scraped">Song scraped and copied to clipboard.</string>
+    <string name="status_offline">Offline. Connect to the internet and press Reload.</string>
+    <string name="status_page_error">Page could not be loaded. Press Reload.</string>
+    <string name="status_http_error">Server returned HTTP error %1$d. Press Reload.</string>
+    <string name="status_no_song">No song selected</string>
+    <string name="status_artist_empty">Artist: -</string>
+    <string name="status_key_empty">Key: -</string>
+    <string name="status_artist">Artist: %1$s</string>
+    <string name="status_key">Key: %1$s</string>
+    <string name="status_unknown">Unknown</string>
 </resources>

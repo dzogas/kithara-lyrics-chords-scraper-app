@@ -4,14 +4,60 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="#161616">
+
+        <TextView
+            android:id="@+id/statusState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/status_starting"
+            android:textColor="#FFB21A"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/songTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/status_no_song"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/songArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/status_artist_empty"
+            android:textColor="#D0D0D0"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/songKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/status_key_empty"
+            android:textColor="#D0D0D0"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <!-- Web content and loading state -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <WebView
-            android:id="@+id/webView"
+        <FrameLayout
+            android:id="@+id/webViewContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent" />
