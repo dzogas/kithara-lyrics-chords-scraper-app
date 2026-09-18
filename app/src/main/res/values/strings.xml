@@ -26,4 +26,12 @@
     <string name="status_artist">Artist: %1$s</string>
     <string name="status_key">Key: %1$s</string>
     <string name="status_unknown">Unknown</string>
+    <string name="update_available_title">Update available</string>
+    <string name="update_available_message">Version %1$s is available. Download it now?</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_download">Download</string>
+    <string name="update_download_title">Kithara Scraper %1$s</string>
+    <string name="update_download_description">Downloading the latest APK</string>
+    <string name="checking_for_updates">Checking GitHub for updates&#8230;</string>
+    <string name="version_up_to_date">Your version is up to date!</string>
 </resources>

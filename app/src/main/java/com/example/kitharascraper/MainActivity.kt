@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.app.DownloadManager
+import android.app.AlertDialog
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -17,9 +19,13 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import android.annotation.SuppressLint
 import android.webkit.WebResourceRequest
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 // import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -30,6 +36,9 @@ import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         const val HOME_URL = "https://www.google.com/cse?cx=34db0576810b64cd3"
         const val ALLOWED_HOST = "kithara.to"
         const val GOOGLE_HOST = "google.com"
+        const val LATEST_RELEASE_API = "https://api.github.com/repos/dzogas/kithara-lyrics-chords-scraper-app/releases/latest"
     }
 
     private lateinit var webView: WebView
@@ -75,6 +85,20 @@ class MainActivity : AppCompatActivity() {
         window.setBackgroundDrawableResource(android.R.color.white)
         setContentView(R.layout.activity_main)
 
+        val appHeader = findViewById<android.view.View>(R.id.appHeader)
+        val initialTopPadding = appHeader.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(appHeader) { view, insets ->
+            val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.setPadding(
+                view.paddingLeft,
+                initialTopPadding + statusBarInset,
+                view.paddingRight,
+                view.paddingBottom
+            )
+            insets
+        }
+        ViewCompat.requestApplyInsets(appHeader)
+
         webViewContainer = findViewById(R.id.webViewContainer)
         progressBar = findViewById(R.id.progressBar)
         backBtn = findViewById(R.id.backBtn)
@@ -92,6 +116,8 @@ class MainActivity : AppCompatActivity() {
 
         scrapeBtn.isEnabled = false
         window.decorView.post { initializeWebView() }
+        Toast.makeText(this, getString(R.string.checking_for_updates), Toast.LENGTH_SHORT).show()
+        checkForUpdates()
 
         backBtn.setOnClickListener {
             if (::webView.isInitialized && webView.canGoBack()) {
@@ -320,6 +346,100 @@ class MainActivity : AppCompatActivity() {
         if (::statusState.isInitialized) {
             statusState.text = message
         }
+    }
+
+    private fun checkForUpdates() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = fetchAvailableUpdate()
+            withContext(Dispatchers.Main) {
+                if (result.update != null) {
+                    showUpdateDialog(result.update.first, result.update.second)
+                } else if (result.succeeded) {
+                    Toast.makeText(this@MainActivity, getString(R.string.version_up_to_date), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun fetchAvailableUpdate(): UpdateCheckResult {
+        return try {
+            val connection = URL(LATEST_RELEASE_API).openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("Accept", "application/vnd.github+json")
+            connection.setRequestProperty("User-Agent", "KitharaScraper")
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+
+            if (connection.responseCode !in 200..299) return UpdateCheckResult(null, false)
+
+            val release = connection.inputStream.bufferedReader().use { JSONObject(it.readText()) }
+            val latestVersion = release.optString("tag_name").removePrefix("v").trim()
+            val apkUrl = release.optJSONArray("assets")
+                ?.let { assets ->
+                    (0 until assets.length())
+                        .map { assets.optJSONObject(it) }
+                        .firstOrNull { it?.optString("name")?.endsWith(".apk", ignoreCase = true) == true }
+                        ?.optString("browser_download_url")
+                }
+                .orEmpty()
+
+            if (latestVersion.isBlank() || apkUrl.isBlank()) {
+                UpdateCheckResult(null, false)
+            } else if (!isNewerVersion(latestVersion)) {
+                UpdateCheckResult(null, true)
+            } else {
+                UpdateCheckResult(latestVersion to apkUrl, true)
+            }
+        } catch (_: Exception) {
+            UpdateCheckResult(null, false)
+        }
+    }
+
+    private data class UpdateCheckResult(
+        val update: Pair<String, String>?,
+        val succeeded: Boolean
+    )
+
+    private fun isNewerVersion(remoteVersion: String): Boolean {
+        val installedVersion = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
+        val remoteParts = remoteVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        val installedParts = installedVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        val maxParts = maxOf(remoteParts.size, installedParts.size)
+
+        for (index in 0 until maxParts) {
+            val remotePart = remoteParts.getOrElse(index) { 0 }
+            val installedPart = installedParts.getOrElse(index) { 0 }
+            if (remotePart != installedPart) return remotePart > installedPart
+        }
+        return false
+    }
+
+    private fun showUpdateDialog(version: String, apkUrl: String) {
+        if (isFinishing || isDestroyed) return
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.update_available_title))
+            .setMessage(getString(R.string.update_available_message, version))
+            .setNegativeButton(R.string.update_cancel, null)
+            .setPositiveButton(R.string.update_download) { _, _ ->
+                downloadUpdate(apkUrl, version)
+            }
+            .show()
+    }
+
+    private fun downloadUpdate(apkUrl: String, version: String) {
+        val request = DownloadManager.Request(apkUrl.toUri())
+            .setTitle(getString(R.string.update_download_title, version))
+            .setDescription(getString(R.string.update_download_description))
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setMimeType("application/vnd.android.package-archive")
+            .setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                "kithara-v$version.apk"
+            )
+
+        getSystemService(DownloadManager::class.java).enqueue(request)
+        finishAndRemoveTask()
     }
 
     private fun extractFirstChord(chordLine: String): String? {

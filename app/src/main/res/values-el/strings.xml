@@ -27,4 +27,12 @@
     <string name="status_artist">Καλλιτέχνης: %1$s</string>
     <string name="status_key">Τόνος: %1$s</string>
     <string name="status_unknown">Άγνωστο</string>
+    <string name="update_available_title">Διαθέσιμη ενημέρωση</string>
+    <string name="update_available_message">Η έκδοση %1$s είναι διαθέσιμη. Θέλετε να την κατεβάσετε;</string>
+    <string name="update_cancel">Ακύρωση</string>
+    <string name="update_download">Λήψη</string>
+    <string name="update_download_title">Kithara Scraper %1$s</string>
+    <string name="update_download_description">Λήψη της τελευταίας έκδοσης APK</string>
+    <string name="checking_for_updates">Έλεγχος για ενημερώσεις στο GitHub&#8230;</string>
+    <string name="version_up_to_date">Η έκδοσή σας είναι ενημερωμένη!</string>
 </resources>
